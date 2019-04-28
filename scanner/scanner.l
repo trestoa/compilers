@@ -22,8 +22,21 @@ islist   |
 or              printf("%s\n", yytext);
 {specialchar}   printf("%s\n", yytext);
 {identifier}    printf("id %s\n", yytext);
-{decdigit}  |
-{hexdigit}      printf("num %s\n", yytext);
+{decdigit}      {
+                    long res = strtol(yytext, NULL, 10);
+                    if (errno != 0 && res == 0) {
+                        fprintf(stderr, "Failed to convert to number: %s\n", strerror(errno));
+                    }
+                    printf("num %lu\n", res);
+                }
+{hexdigit}      {
+                    // Skip $ character by adding 1
+                    long res = strtol(yytext + 1, NULL, 16);
+                    if (errno != 0 && res == 0) {
+                        fprintf(stderr, "Failed to convert to number: %s\n", strerror(errno));
+                    }
+                    printf("num %lu\n", res);
+                }
 {whitespace}+   ;
 {comment}       ;
 .               {

@@ -2,7 +2,6 @@
 
 whitespace  [\n\t ]
 comment     "{".*"}"
-specialchar [;\(\),=:+*\.-]
 identifier  [A-Za-z][A-Za-z0-9]*
 decdigit    [0-9]+
 hexdigit    \$[a-fA-F0-9]+    

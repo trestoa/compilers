@@ -16,9 +16,11 @@ funcdef :    ID '(' ')' stats END
 
 pars    :    pars ',' ID 
         |    ID
+        ;
 
 stats   :    /* empty */
         |    stats stat ';'
+        ;
 
 stat    :    RETURN expr
         |    cond
@@ -46,8 +48,12 @@ contexp :    CONTINUE
         |    BREAK
         ;
 
-expr    :    listexp term
-        |    numexp
+expr    :    term
+        |    listexp term
+        |    term addexp
+        |    term mulexp
+        |    term dotexp
+        |    term orexp
         |    term GTEQ term
         |    term '=' term
         |    term '-' term
@@ -63,13 +69,21 @@ listexp :    NOT
         |    ISLIST listexp
         ;
 
-numexp  :    term
-        |    numexp '+' term
-        |    numexp '*' term
-        |    numexp '.' term 
-        |    numexp OR term 
+addexp  :    '+' term addexp
+        |    '+' term
         ;
 
+mulexp  :    '*' term mulexp
+        |    '*' term
+        ;
+
+dotexp  :    '.' term dotexp
+        |    '.' term
+        ;
+
+orexp   :    OR term orexp
+        |    OR term
+        ;
 
 term    :    '(' expr ')'
         |    NUM
@@ -80,6 +94,7 @@ term    :    '(' expr ')'
 
 cargs   :    cargs ',' expr 
         |    expr
+        ;
 
 %%
 #include "lex.yy.c"

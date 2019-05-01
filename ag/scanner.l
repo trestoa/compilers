@@ -1,6 +1,11 @@
 %option noyywrap
 %{
 #include "y.tab.h"
+#include "ag.h"
+
+#include <string.h>
+
+#define lexeme strcpy((char *) malloc(yyleng+1), yytext)
 %}
 
 whitespace  [\n\t ]
@@ -34,7 +39,7 @@ or              return (OR);
 ":"             return (':');
 ","             return (',');
 ">="            return (GTEQ);
-{identifier}    return (ID);
+{identifier}    return (ID); @{ @ID.val@ = lexeme; @}
 {decdigit}  |
 {hexdigit}      return (NUM);
 {whitespace}+   ;

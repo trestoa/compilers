@@ -2,7 +2,7 @@
 # Author: Markus Klein (e11707252@student.tuwien.ac.at)
 #
 CC = gcc
-LEX = flex
+LEX = lex
 YACC = yacc
 OX = ox
 
@@ -14,7 +14,6 @@ all: ag
 ag: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -22,7 +21,7 @@ y.tab.o: y.tab.c
 
 lex.yy.o: lex.yy.c y.tab.h
 
-lex.yy.c lex.yy.h: scanner.l
+lex.yy.c lex.yy.h: oxout.l
 	$(LEX) $<
 
 oxout.y oxout.l: gram.y scanner.l

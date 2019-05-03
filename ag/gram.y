@@ -46,7 +46,7 @@ void print_symbols(symbol_t *head) {
     printf("\n");
 }
 
-void check_symbol(char *name, symbol_type_t type, symbol_t* head) {
+void check_symbol_usage(char *name, symbol_type_t type, symbol_t* head) {
     if(head == NULL) {
         printf("Error: Symbol '%s' not found.\n", name);
         exit(3);
@@ -58,6 +58,19 @@ void check_symbol(char *name, symbol_type_t type, symbol_t* head) {
     } while((head = head->next) != NULL);
     printf("Error: Symbol '%s' not found.\n", name);
     exit(3);
+}
+
+void check_symbol_def(char *name, symbol_t *head) {
+    if(head == NULL) {
+        return;
+    }
+
+    do {
+        if(strcmp(name, head->name) == 0) {
+            printf("Error: Symbol '%s' already defined.\n", name);
+            exit(3);
+        }
+    } while((head = head->next) != NULL);
 }
 %}
 
@@ -106,9 +119,11 @@ funcdef :    ID '(' ')' stats END
 pars    :    pars ',' ID 
              @{
                  @i @pars.symbols_inh@ = append_symbol_node(new_symbol_node(@ID.val@, VARIABLE), @pars.1.symbols_inh@);
+                 
+                 @check check_symbol_def(@ID.val@, @pars.1.symbols_inh@);
              @}
         |    ID
-             @{
+             @{       
                  @i @pars.symbols_inh@ = new_symbol_node(@ID.val@, VARIABLE);
              @}
         ;
@@ -144,7 +159,7 @@ stat    :    RETURN expr
              @{
                  @i @expr.symbols_inh@ = @stat.symbols_inh@;
 
-                 @check check_symbol(@ID.val@, VARIABLE, @stat.symbols_inh@);
+                 @check check_symbol_usage(@ID.val@, VARIABLE, @stat.symbols_inh@);
              @}
         ;
 
@@ -152,6 +167,8 @@ vardef  :    VAR ID '=' expr
              @{
                  @i @vardef.symbols@ = new_symbol_node(@ID.val@, VARIABLE);
                  @i @expr.symbols_inh@ = @vardef.symbols_inh@;
+                 
+                 @check check_symbol_def(@ID.val@, @vardef.symbols_inh@);
              @}
         ;
 
@@ -161,6 +178,8 @@ cond    :    condlab COND guarded END
                  @i @guarded.symbols_inh@ = @cond.label@ == NULL
                         ? @cond.symbols_inh@ 
                         : append_symbol_node(@cond.label@, @cond.symbols_inh@);
+                 
+                 @check check_symbol_def(@cond.label@->name, @cond.symbols_inh@);
              @}
         ;
 
@@ -191,7 +210,7 @@ guarded :    /* empty */
         ;
 
 glab    :    /* empty */
-        |    ID @{ @check check_symbol(@ID.val@, LABEL, @glab.symbols_inh@); @}
+        |    ID @{ @check check_symbol_usage(@ID.val@, LABEL, @glab.symbols_inh@); @}
         ;
 
 contexp :    CONTINUE
@@ -302,7 +321,7 @@ term    :    '(' expr ')'
                  @i @expr.symbols_inh@ = @term.symbols_inh@;
              @}
         |    NUM
-        |    ID @{ @check check_symbol(@ID.val@, VARIABLE, @term.symbols_inh@); @}
+        |    ID @{ @check check_symbol_usage(@ID.val@, VARIABLE, @term.symbols_inh@); @}
         |    ID '(' ')'
         |    ID '(' cargs ')'
              @{

@@ -179,7 +179,7 @@ cond    :    condlab COND guarded END
                         ? @cond.symbols_inh@ 
                         : append_symbol_node(@cond.label@, @cond.symbols_inh@);
                  
-                 @check check_symbol_def(@cond.label@->name, @cond.symbols_inh@);
+                 @check if(@cond.label@ != NULL) check_symbol_def(@cond.label@->name, @cond.symbols_inh@);
              @}
         ;
 

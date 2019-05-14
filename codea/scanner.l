@@ -41,8 +41,8 @@ or              return (OR);
 ","             return (',');
 ">="            return (GTEQ);
 {identifier}    return (ID); @{ @ID.val@ = lexeme; @}
-{decdigit}  |
-{hexdigit}      return (NUM);
+{decdigit}      return (NUM); @{ @NUM.val@ = strtol(yytext, NULL, 10); @}
+{hexdigit}      return (NUM); @{ @NUM.val@ = strtol(yytext+1, NULL, 16); @}
 {whitespace}+   ;
 {comment}       ;
 .               {

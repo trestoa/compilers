@@ -85,6 +85,7 @@ extern void burm_reduce(op_tree_t *t, int goalnt);
 %start  program
 
 @attributes { char *val; } ID
+@attributes { long val; } NUM
 @attributes { symbol_t *symbols_inh; } funcdef
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } pars
 
@@ -92,11 +93,11 @@ extern void burm_reduce(op_tree_t *t, int goalnt);
 @attributes { symbol_t *symbols_inh; symbol_t *symbols; } stats
 @attributes { symbol_t *label; symbol_t *symbols_inh; } cond
 @attributes { symbol_t *label; } condlab
-@attributes { symbol_t *symbols_inh; } stat
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } stat
 @attributes { symbol_t *symbols_inh; } guarded
 
-@attributes { symbol_t *symbols_inh; } term
-@attributes { symbol_t *symbols_inh; } expr
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } term
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } expr
 @attributes { symbol_t *symbols_inh; } addexp
 @attributes { symbol_t *symbols_inh; } mulexp
 @attributes { symbol_t *symbols_inh; } dotexp
@@ -127,14 +128,14 @@ funcdef :    ID '(' ')' stats END
 pars    :    pars ',' ID 
              @{
                  @i @pars.symbols_inh@ = append_symbol_node(new_symbol_node(@ID.val@, VARIABLE), @pars.1.symbols_inh@);
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL);
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL, 0);
                  
                  @check check_symbol_def(@ID.val@, @pars.1.symbols_inh@);
                  @codegen CALL_CODEGEN(@pars.op_tree@);
              @}
         |    ID
              @{       
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL);
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL, 0);
                  @i @pars.symbols_inh@ = new_symbol_node(@ID.val@, VARIABLE);
 
                  @codegen CALL_CODEGEN(@pars.op_tree@);
@@ -163,14 +164,19 @@ stats   :    /* empty */
 stat    :    RETURN expr
              @{
                  @i @expr.symbols_inh@ = @stat.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@stat.op_tree@, RET, @expr.op_tree@, NULL, 0);
+
+                 @codegen CALL_CODEGEN(@stat.op_tree@);
              @}
         |    cond
              @{
                  @i @cond.symbols_inh@ = @stat.symbols_inh@;
+                 @i @stat.op_tree@=NULL;
              @}
         |    ID '=' expr
              @{
                  @i @expr.symbols_inh@ = @stat.symbols_inh@;
+                 @i @stat.op_tree@=NULL;
 
                  @check check_symbol_usage(@ID.val@, VARIABLE, @stat.symbols_inh@);
              @}
@@ -233,45 +239,54 @@ contexp :    CONTINUE
 expr    :    term
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = @term.op_tree@;
              @}
         |    listexp term
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term addexp
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @addexp.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term mulexp
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @mulexp.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term dotexp
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @dotexp.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term orexp
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @orexp.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term GTEQ term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term '=' term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         |    term '-' term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = NULL;
              @}
         ;
 
@@ -332,13 +347,26 @@ orexp   :    OR term orexp
 term    :    '(' expr ')'
              @{
                  @i @expr.symbols_inh@ = @term.symbols_inh@;
+                 @i @term.op_tree@  = NULL;
              @}
         |    NUM
-        |    ID @{ @check check_symbol_usage(@ID.val@, VARIABLE, @term.symbols_inh@); @}
+             @{
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, CONSTANT, NULL, NULL, @NUM.val@);                 
+             @}
+        |    ID 
+             @{ 
+                 @i @term.op_tree@  = NULL;
+                 
+                 @check check_symbol_usage(@ID.val@, VARIABLE, @term.symbols_inh@); 
+             @}
         |    ID '(' ')'
+             @{
+                 @i @term.op_tree@  = NULL;
+             @}
         |    ID '(' cargs ')'
              @{
                  @i @cargs.symbols_inh@ = @term.symbols_inh@;
+                 @i @term.op_tree@  = NULL;
              @}
         ;
 

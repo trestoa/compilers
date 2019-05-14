@@ -8,8 +8,9 @@
 
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4
 
 %%
-
-reg:    VARDEF                          # 0 # NEWREG(bnode); printf("regname: %s\n", bnode->regname);
+con:    CONSTANT                        # 0
+reg:    VARDEF                          # 0 # NEWREG(bnode);
+reg:    RET(con)                        # 1 # printf("movq $%u, %%rax\nret\n", kids[0]->val);

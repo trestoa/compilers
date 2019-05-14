@@ -1,0 +1,15 @@
+%{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <assert.h>
+    #include "codegen.h"
+
+    registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0};
+
+%}
+%start reg
+%term ASSIGN=1 CONSTANT=2 VARDEF=3
+
+%%
+
+reg:    VARDEF                          # 0 # NEWREG(bnode); printf("regname: %s\n", bnode->regname);

@@ -5,8 +5,8 @@ typedef enum op {
     ASSIGN = 1,
     CONSTANT = 2,
     VARDEF = 3,
-    RET = 4
-
+    RET = 4,
+    ADD = 5
 } op_t;
 
 #define STATEPTR_TYPE long

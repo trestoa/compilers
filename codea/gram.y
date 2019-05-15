@@ -78,7 +78,19 @@ void check_symbol_def(char *name, symbol_t *head) {
 extern STATEPTR_TYPE burm_label(op_tree_t *t);
 extern void burm_reduce(op_tree_t *t, int goalnt);
 
-#define CALL_CODEGEN(t) burm_label(t); burm_reduce(t, 1);
+#define CALL_CODEGEN(t) print_optree(t, 0); burm_label(t); burm_reduce(t, 1);
+
+void print_optree(op_tree_t *t, int offset) {
+    for(int i = 0; i < offset; i++)
+        printf(" ");
+    
+    printf("op: %u\n", t->op);
+
+    if(t->kids[0] != NULL)
+        print_optree(t->kids[0], offset + 2);
+    if(t->kids[1] != NULL)
+        print_optree(t->kids[1], offset + 2);
+}
 %}
 
 %token  OR END ID COND RETURN HEAD TAIL ISLIST BREAK CONTINUE VAR NOT RA NUM ';' '(' ')' '=' '-' '.' ':' ',' GTEQ
@@ -98,7 +110,7 @@ extern void burm_reduce(op_tree_t *t, int goalnt);
 
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } term
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } expr
-@attributes { symbol_t *symbols_inh; } addexp
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } addexp
 @attributes { symbol_t *symbols_inh; } mulexp
 @attributes { symbol_t *symbols_inh; } dotexp
 @attributes { symbol_t *symbols_inh; } orexp
@@ -250,7 +262,8 @@ expr    :    term
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @addexp.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, ADD, @term.op_tree@, @addexp.op_tree@, 0);
              @}
         |    term mulexp
              @{
@@ -304,10 +317,12 @@ addexp  :    '+' term addexp
              @{
                  @i @addexp.1.symbols_inh@ = @addexp.symbols_inh@;
                  @i @term.symbols_inh@ = @addexp.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@addexp.op_tree@, ADD, @term.op_tree@, @addexp.1.op_tree@, 0);
              @}
         |    '+' term
              @{
                  @i @term.symbols_inh@ = @addexp.symbols_inh@;
+                 @i @addexp.op_tree@ = @term.op_tree@;
              @}
         ;
 

@@ -8,9 +8,16 @@
 
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6
 
 %%
-con:    CONSTANT                        # 0
-reg:    VARDEF                          # 0 # NEWREG(bnode);
-reg:    RET(con)                        # 1 # printf("movq $%u, %%rax\nret\n", kids[0]->val);
+con:    CONSTANT            # 0
+reg:    VARDEF              # 0 # NEWREG(bnode);
+
+reg:    con                 # 1 # NEWREG(bnode); printf("leaq ($%u, 2), %s\n", kids[0]->val, bnode->regname);
+
+reg:    RET(con)            # 1 # printf("leaq ($%u, 2), %%rax\nret\n", kids[0]->val);
+reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname);
+
+con:    ADD(con, con)       # 0 # bnode->val = kids[0]->val + kids[1]->val;
+reg:    ADD(reg, reg)       # 2 # NEWREG(bnode); printf("movq %s, %s\naddq %s, %s\n", kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname);

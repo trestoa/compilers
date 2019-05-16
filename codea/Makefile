@@ -36,6 +36,11 @@ oxout.y oxout.l: gram.y scanner.l
 y.tab.c y.tab.h: oxout.y
 	$(YACC) -d $<
 
+test: f.s test.c
+	gcc -c f.s
+	gcc -c test.c
+	gcc -o test test.o f.o
+
 clean:
 	rm -rf *.o lex.yy.c y.tab.c y.tab.h oxout.y oxout.l codegen.c codea
 

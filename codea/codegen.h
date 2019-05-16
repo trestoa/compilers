@@ -6,7 +6,9 @@ typedef enum op {
     CONSTANT = 2,
     VARDEF = 3,
     RET = 4,
-    ADD = 5
+    ADD = 5,
+    MUL = 6,
+    VARUSE = 7
 } op_t;
 
 #define STATEPTR_TYPE long
@@ -17,12 +19,14 @@ typedef struct op_tree {
     struct op_tree *kids[2];
     STATEPTR_TYPE state;
     char *regname;
+    char *varname;
     long val;
 } op_tree_t;
 #define NODEPTR_TYPE op_tree_t*
 
 typedef struct registers {
     char *regnames[6];
+    char *varnames[6];
     int regs_used;
 } registers_t;
 
@@ -35,6 +39,19 @@ typedef struct registers {
     if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \
     p->regname = registers.regnames[registers.regs_used++];
 
+#define NEWVAR(p) \
+    if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \
+    p->regname = registers.regnames[registers.regs_used]; \
+    registers.varnames[registers.regs_used++] = p->varname;
+
+#define SET_VARREG(p) \
+    for(int i = 0; i < registers.regs_used; i++) { \
+        if(strcmp(p->varname, registers.varnames[i]) == 0) { \
+            p->regname = registers.regnames[i]; \
+            break; \
+        } \
+    }
+    
 #define NEW_OP_TREE_NODE(t, opval, k1, k2, _val) \
     t = malloc(sizeof(op_tree_t)); \
     t->op = opval; \

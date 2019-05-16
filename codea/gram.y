@@ -78,7 +78,7 @@ void check_symbol_def(char *name, symbol_t *head) {
 extern STATEPTR_TYPE burm_label(op_tree_t *t);
 extern void burm_reduce(op_tree_t *t, int goalnt);
 
-#define CALL_CODEGEN(t) print_optree(t, 0); burm_label(t); burm_reduce(t, 1);
+#define CALL_CODEGEN(t) /*0print_optree(t, 0);*/ burm_label(t); burm_reduce(t, 1);
 
 void print_optree(op_tree_t *t, int offset) {
     for(int i = 0; i < offset; i++)
@@ -118,7 +118,8 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; } glab
 
 @traversal @preorder check
-@traversal @preorder codegen
+@traversal @preorder preamble
+@traversal @postorder codegen
 
 %%
 program :    /* empty */
@@ -129,32 +130,36 @@ funcdef :    ID '(' ')' stats END
              @{
                  @i @funcdef.symbols_inh@ = NULL;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
+
+                 @preamble printf(".text\n.globl %s\n.globl _%s\n%s:\n_%s:\n", @ID.val@, @ID.val@, @ID.val@, @ID.val@);
              @}
         |    ID '(' pars ')' stats END
              @{
                  @i @funcdef.symbols_inh@ = @pars.symbols_inh@;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
+
+                 @preamble printf(".text\n.globl %s\n.globl _%s\n%s:\n_%s:\n", @ID.val@, @ID.val@, @ID.val@, @ID.val@);
              @}
         ;
 
 pars    :    pars ',' ID 
              @{
                  @i @pars.symbols_inh@ = append_symbol_node(new_symbol_node(@ID.val@, VARIABLE), @pars.1.symbols_inh@);
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL, 0);
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL, 0); @pars.op_tree@->varname = @ID.val@;
                  
                  @check check_symbol_def(@ID.val@, @pars.1.symbols_inh@);
                  @codegen CALL_CODEGEN(@pars.op_tree@);
              @}
         |    ID
              @{       
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL, 0);
-                 @i @pars.symbols_inh@ = new_symbol_node(@ID.val@, VARIABLE);
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL, 0); @pars.op_tree@->varname = @ID.val@;
+                 @i @pars.symbols_inh@ = new_symbol_node(@ID.val@, VARIABLE); 
 
                  @codegen CALL_CODEGEN(@pars.op_tree@);
              @}
         ;
 
-stats   :    /* empty */
+stats    :    /* empty */
              @{
                  @i @stats.symbols@ = NULL;
              @}
@@ -370,7 +375,7 @@ term    :    '(' expr ')'
              @}
         |    ID 
              @{ 
-                 @i @term.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, VARUSE, NULL, NULL, 0); @term.op_tree@->varname = @ID.val@;
                  
                  @check check_symbol_usage(@ID.val@, VARIABLE, @term.symbols_inh@); 
              @}

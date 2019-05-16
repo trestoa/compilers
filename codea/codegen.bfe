@@ -2,19 +2,21 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <assert.h>
+    #include <string.h>
     #include "codegen.h"
 
-    registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0};
+    registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0, .varnames = {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7
 
 %%
 con:    CONSTANT            # 0
-reg:    VARDEF              # 0 # NEWREG(bnode);
+reg:    VARDEF              # 0 # NEWVAR(bnode);
+reg:    VARUSE              # 0 # SET_VARREG(bnode);
 
-reg:    con                 # 1 # NEWREG(bnode); printf("leaq ($%u, 2), %s\n", kids[0]->val, bnode->regname);
+reg:    con                 # 1 # NEWREG(bnode); printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
 
 reg:    RET(con)            # 1 # printf("leaq ($%u, 2), %%rax\nret\n", kids[0]->val);
 reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname);

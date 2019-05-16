@@ -54,15 +54,15 @@ typedef struct registers {
             break; \
         } \
     }
-    
-#define NEW_OP_TREE_NODE(t, opval, k1, k2, _val) \
+
+#define NEW_OP_TREE_NODE(t, opval, k1, k2, _val, _varname) \
     t = malloc(sizeof(op_tree_t)); \
     t->op = opval; \
     t->kids[0] = k1; \
     t->kids[1] = k2; \
     t->state = 0; \
     t->regname = NULL; \
-    t->val = _val;
-
+    t->val = _val; \
+    t->varname = _varname;
 
 #endif

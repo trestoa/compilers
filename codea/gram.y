@@ -145,14 +145,14 @@ funcdef :    ID '(' ')' stats END
 pars    :    pars ',' ID 
              @{
                  @i @pars.symbols_inh@ = append_symbol_node(new_symbol_node(@ID.val@, VARIABLE), @pars.1.symbols_inh@);
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL, 0); @pars.op_tree@->varname = @ID.val@;
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, @pars.1.op_tree@, NULL, 0, @ID.val@)
                  
                  @check check_symbol_def(@ID.val@, @pars.1.symbols_inh@);
                  @codegen CALL_CODEGEN(@pars.op_tree@);
              @}
         |    ID
              @{       
-                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL, 0); @pars.op_tree@->varname = @ID.val@;
+                 @i NEW_OP_TREE_NODE(@pars.op_tree@, VARDEF, NULL, NULL, 0, @ID.val@)
                  @i @pars.symbols_inh@ = new_symbol_node(@ID.val@, VARIABLE); 
 
                  @codegen CALL_CODEGEN(@pars.op_tree@);
@@ -181,7 +181,7 @@ stats    :    /* empty */
 stat    :    RETURN expr
              @{
                  @i @expr.symbols_inh@ = @stat.symbols_inh@;
-                 @i NEW_OP_TREE_NODE(@stat.op_tree@, RET, @expr.op_tree@, NULL, 0);
+                 @i NEW_OP_TREE_NODE(@stat.op_tree@, RET, @expr.op_tree@, NULL, 0, NULL);
 
                  @codegen CALL_CODEGEN(@stat.op_tree@);
              @}
@@ -268,7 +268,7 @@ expr    :    term
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @addexp.symbols_inh@ = @expr.symbols_inh@;
 
-                 @i NEW_OP_TREE_NODE(@expr.op_tree@, ADD, @term.op_tree@, @addexp.op_tree@, 0);
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, ADD, @term.op_tree@, @addexp.op_tree@, 0, NULL);
              @}
         |    term mulexp
              @{
@@ -322,7 +322,7 @@ addexp  :    '+' term addexp
              @{
                  @i @addexp.1.symbols_inh@ = @addexp.symbols_inh@;
                  @i @term.symbols_inh@ = @addexp.symbols_inh@;
-                 @i NEW_OP_TREE_NODE(@addexp.op_tree@, ADD, @term.op_tree@, @addexp.1.op_tree@, 0);
+                 @i NEW_OP_TREE_NODE(@addexp.op_tree@, ADD, @term.op_tree@, @addexp.1.op_tree@, 0, NULL);
              @}
         |    '+' term
              @{
@@ -367,15 +367,15 @@ orexp   :    OR term orexp
 term    :    '(' expr ')'
              @{
                  @i @expr.symbols_inh@ = @term.symbols_inh@;
-                 @i @term.op_tree@  = NULL;
+                 @i @term.op_tree@  = @expr.op_tree@;
              @}
         |    NUM
              @{
-                 @i NEW_OP_TREE_NODE(@term.op_tree@, CONSTANT, NULL, NULL, @NUM.val@);                 
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, CONSTANT, NULL, NULL, @NUM.val@, NULL);                 
              @}
         |    ID 
              @{ 
-                 @i NEW_OP_TREE_NODE(@term.op_tree@, VARUSE, NULL, NULL, 0); @term.op_tree@->varname = @ID.val@;
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, VARUSE, NULL, NULL, 0, @ID.val@)
                  
                  @check check_symbol_usage(@ID.val@, VARIABLE, @term.symbols_inh@); 
              @}

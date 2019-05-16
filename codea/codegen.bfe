@@ -14,12 +14,12 @@
 %%
 con:    CONSTANT            # 0
 reg:    VARDEF              # 0 # NEWVAR(bnode);
-reg:    VARUSE              # 0 # SET_VARREG(bnode);
+reg:    VARUSE              # 0 # SET_VARREG(bnode)
 
-reg:    con                 # 1 # NEWREG(bnode); printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
+reg:    con                 # 1 # NEWREG(bnode) printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
 
-reg:    RET(con)            # 1 # printf("leaq ($%u, 2), %%rax\nret\n", kids[0]->val);
-reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname);
+reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nret\n", kids[0]->val);
+reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname); FREEREG(1)
 
 con:    ADD(con, con)       # 0 # bnode->val = kids[0]->val + kids[1]->val;
-reg:    ADD(reg, reg)       # 2 # NEWREG(bnode); printf("movq %s, %s\naddq %s, %s\n", kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname);
+reg:    ADD(reg, reg)       # 2 # NEWREG(bnode) printf("movq %s, %s\naddq %s, %s\n", kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)

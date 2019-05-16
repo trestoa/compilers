@@ -39,6 +39,9 @@ typedef struct registers {
     if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \
     p->regname = registers.regnames[registers.regs_used++];
 
+#define FREEREG(n) \
+    registers.regs_used -= 2;
+
 #define NEWVAR(p) \
     if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \
     p->regname = registers.regnames[registers.regs_used]; \

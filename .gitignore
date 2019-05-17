@@ -1,3 +1,7 @@
 .vscode
 *.o
 .DS_STORE
+tools
+gen
+ag/torero
+test*

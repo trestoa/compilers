@@ -32,5 +32,5 @@ reg:    SUB(reg, reg)       # 2 # bnode->regname = kids[0]->regname; CHECK_NUM(k
 reg:    MKLIST(reg, reg)    # 4 # bnode->regname = kids[0]->regname; MKLIST printf("leaq 1(%%r15), %s\n", bnode->regname);
 reg:    HEADOP(reg)         # 3 # bnode->regname = kids[0]->regname; CHECK_LIST(kids[0]->regname) printf("movq -1(%1$s), %1$s\n", bnode->regname);
 reg:    TAILOP(reg)         # 3 # bnode->regname = kids[0]->regname; CHECK_LIST(kids[0]->regname) printf("movq 7(%1$s), %1$s\n", bnode->regname);
-reg:    ISLISTOP(reg)       # 1 # bnode->regname = kids[0]->regname; printf("andq $1, %s\n", bnode->regname);
+reg:    ISLISTOP(reg)       # 1 # bnode->regname = kids[0]->regname; printf("andq $1, %s\nshlq $1, %1$s\n", bnode->regname);
 reg:    NOTOP(reg)          # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) printf("xorq $0b10, %s\n", bnode->regname);

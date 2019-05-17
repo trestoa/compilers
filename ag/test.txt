@@ -1,0 +1,37 @@
+power(numb, n)
+        var res = 1;
+        var result = res;
+loopa:
+        cond
+                n >= 1 ->
+                        var test = 1 + n;
+                        result = result * numb;
+                        n = n - 1;
+                        continue loopa;
+                n = 1 -> return result;
+                         return balh(test);
+                         break;
+                n = 0 -> return 1;
+                         break;
+                      -> return 0;
+                         break;
+        end;
+loopb:
+        cond
+                -> 
+                    result = result;
+                    continue loopb;
+        end;
+end;
+
+f(x) 
+test:
+        cond 
+                x -> 
+                        var y=x; 
+                        break; 
+                -> 
+                        var y=0; 
+                        break; 
+        end; 
+end;

@@ -312,7 +312,7 @@ expr    :    term
 listexp :    NOT term           
              @{ 
                  @i @term.symbols_inh@ = @listexp.symbols_inh@;
-                 @i @listexp.op_tree@ = NULL;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, NOTOP, @term.op_tree@, NULL, 0, NULL); 
              @}
         |    HEAD term          
              @{ 
@@ -327,19 +327,19 @@ listexp :    NOT term
         |    ISLIST term        
              @{ 
                  @i @term.symbols_inh@ = @listexp.symbols_inh@;
-                 @i @listexp.op_tree@ = NULL;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, ISLISTOP, @term.op_tree@, NULL, 0, NULL);
              @}
         |    NOT listexp        
              @{ 
                  @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
-                 @i @listexp.op_tree@ = NULL;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, NOTOP, @listexp.1.op_tree@, NULL, 0, NULL); 
              @}
         |    HEAD listexp       
              @{ 
                  @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
                  @i NEW_OP_TREE_NODE(@listexp.op_tree@, HEADOP, @listexp.1.op_tree@, NULL, 0, NULL);
              @}
-        |    TAIL listexp       
+        |    TAIL listexp
              @{ 
                  @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
                  @i NEW_OP_TREE_NODE(@listexp.op_tree@, TAILOP, @listexp.1.op_tree@, NULL, 0, NULL); 
@@ -347,7 +347,7 @@ listexp :    NOT term
         |    ISLIST listexp     
              @{
                  @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
-                 @i @listexp.op_tree@ = NULL;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, ISLISTOP, @listexp.1.op_tree@, NULL, 0, NULL); 
              @}
         ;
 

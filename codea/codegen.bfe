@@ -5,27 +5,30 @@
     #include <string.h>
     #include "codegen.h"
 
-    #define CHECK_NUM "test $1, %s\njnz raisesig\n"
+    #define CHECK_NUM(reg) printf("test $1, %s\njnz raisesig\n", reg);
     #define MKLIST    printf("subq $16, %%r15\nmovq %s, (%%r15)\nmovq %s, 8(%%r15)\n", kids[0]->regname, kids[1]->regname);
 
     registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0, .varnames = {NULL, NULL, NULL, NULL, NULL, NULL}};
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11 NOTOP=12 ISLISTOP=13 NOP=14
 
 %%
 con:    CONSTANT            # 0
 reg:    VARDEF              # 0 # NEWVAR(bnode);
-reg:    VARUSE              # 0 # SET_VARREG(bnode)
+varu:   VARUSE              # 0 # SET_VARREG(bnode)
+reg:    varu                # 1 # printf("movq %s", bnode->regname); NEWREG(bnode) printf(", %s\n", bnode->regname);
 
-reg:    con                 # 1 # NEWREG(bnode) printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
+reg:    con                 # 1 # /* Copy variable into new register */ NEWREG(bnode) printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
 
 reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nret\n", kids[0]->val);
-reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname); FREEREG(1)
+reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname);
 
-reg:    ADD(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\naddq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
-reg:    MUL(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\nshrq $1, %s\nimulq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
-reg:    SUB(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\nsubq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
-reg:    MKLIST(reg, reg)    # 4 # NEWREG(bnode) MKLIST printf("leaq 1(%%r15), %s\n", bnode->regname); FREEREG(2)
-reg:    HEADOP(reg)         # 3 # NEWREG(bnode) printf("movq -1(%s), %s\n", kids[0]->regname, bnode->regname);
-reg:    TAILOP(reg)         # 3 # NEWREG(bnode) printf("movq 7(%s), %s\n", kids[0]->regname, bnode->regname);
+reg:    ADD(reg, reg)       # 2 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("addq %s, %s\n",kids[1]->regname, bnode->regname);
+reg:    MUL(reg, reg)       # 2 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("shrq $1, %s\nimulq %s, %s\n",bnode->regname, kids[1]->regname, bnode->regname);
+reg:    SUB(reg, reg)       # 2 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("subq %s, %s\n", kids[1]->regname, bnode->regname); 
+reg:    MKLIST(reg, reg)    # 4 # bnode->regname = kids[0]->regname; MKLIST printf("leaq 1(%%r15), %s\n", bnode->regname);
+reg:    HEADOP(reg)         # 3 # bnode->regname = kids[0]->regname; printf("movq -1(%1$s), %1$s\n", bnode->regname);
+reg:    TAILOP(reg)         # 3 # bnode->regname = kids[0]->regname; printf("movq 7(%1$s), %1$s\n", bnode->regname);
+reg:    ISLISTOP(reg)       # 1 # bnode->regname = kids[0]->regname; printf("andq $1, %s\n", bnode->regname);
+reg:    NOTOP(reg)          # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) printf("xorq $0b10, %s\n", bnode->regname);

@@ -12,7 +12,9 @@ typedef enum op {
     SUB = 8,
     MKLIST = 9,
     HEADOP = 10,
-    TAILOP = 11
+    TAILOP = 11,
+    NOTOP = 12,
+    ISLISTOP = 13
 } op_t;
 
 typedef struct burm_state *STATEPTR_TYPE;
@@ -43,7 +45,7 @@ typedef struct registers {
     p->regname = registers.regnames[registers.regs_used++];
 
 #define FREEREG(n) \
-    registers.regs_used -= 2;
+    registers.regs_used -= n;
 
 #define NEWVAR(p) \
     if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \

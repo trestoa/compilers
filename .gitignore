@@ -4,3 +4,5 @@
 tools
 gen
 ag/torero
+
+!codea/test/callingconvention.o

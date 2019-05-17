@@ -49,5 +49,5 @@ test: f.s test.c
 	gcc -o test test.o f.o
 
 clean:
-	rm -rf *.o lex.yy.c y.tab.c y.tab.h oxout.y oxout.l codegen.c codea *.s test
+	rm -rf ./*.o lex.yy.c y.tab.c y.tab.h oxout.y oxout.l codegen.c codea *.s
 

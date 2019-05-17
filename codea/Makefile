@@ -1,12 +1,19 @@
 #
 # Author: Markus Klein (e11707252@student.tuwien.ac.at)
 #
-CC = gcc
 LEX = lex
 YACC = yacc
 OX = ox
-BFE = ../tools/bfe
-BURG = /Users/markus/git/iburg/iburg
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	CC = clang
+	BFE = ../tools/bfe
+	BURG = /Users/markus/git/iburg/iburg
+else
+	CC = gcc
+	BFE = bfe
+	BURG = iburg
+endif
 
 OBJECTS = y.tab.o lex.yy.o codegen.o
 

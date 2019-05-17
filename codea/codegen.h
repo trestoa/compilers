@@ -11,8 +11,7 @@ typedef enum op {
     VARUSE = 7
 } op_t;
 
-#define STATEPTR_TYPE long
-#define STATE_TYPE long
+typedef struct burm_state *STATEPTR_TYPE;
 
 typedef struct op_tree {
     op_t op;

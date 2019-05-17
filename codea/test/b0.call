@@ -1,3 +1,0 @@
-extern long f(long);
-long a[] = {0,0};
-RET(f(((long)a)|1) == ((long)a)|1);

@@ -7,6 +7,8 @@ extern long callchecking();
 static long heap[1000000];
 register long *heapptr asm("%r15");
 
+int err = 0;
+
 #define RET return
 
 int call(void)
@@ -26,5 +28,6 @@ int main(int argc, char *argv[])
 
 void raisesig()
 {
-  raise(11);
+  err = 1;
+  asm("leave\nret");
 }

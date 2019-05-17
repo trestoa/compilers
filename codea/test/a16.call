@@ -1,0 +1,3 @@
+extern long f(long);
+printf("ret: %u\n", f(4));
+RET(f(4) == 2);

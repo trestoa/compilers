@@ -14,7 +14,10 @@ typedef enum op {
     HEADOP = 10,
     TAILOP = 11,
     NOTOP = 12,
-    ISLISTOP = 13
+    ISLISTOP = 13,
+    OROP = 14,
+    EQOP = 15,
+    GTEQOP = 16
 } op_t;
 
 typedef struct burm_state *STATEPTR_TYPE;

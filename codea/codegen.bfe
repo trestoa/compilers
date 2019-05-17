@@ -13,7 +13,7 @@
     registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0, .varnames = {NULL, NULL, NULL, NULL, NULL, NULL}};
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11 NOTOP=12 ISLISTOP=13 NOP=14
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11 NOTOP=12 ISLISTOP=13 OROP=14 EQOP=15 GTEQOP=16
 
 %%
 con:    CONSTANT            # 0
@@ -34,3 +34,6 @@ reg:    HEADOP(reg)         # 3 # bnode->regname = kids[0]->regname; CHECK_LIST(
 reg:    TAILOP(reg)         # 3 # bnode->regname = kids[0]->regname; CHECK_LIST(kids[0]->regname) printf("movq 7(%1$s), %1$s\n", bnode->regname);
 reg:    ISLISTOP(reg)       # 1 # bnode->regname = kids[0]->regname; printf("andq $1, %s\nshlq $1, %1$s\n", bnode->regname);
 reg:    NOTOP(reg)          # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) printf("xorq $0b10, %s\n", bnode->regname);
+reg:    OROP(reg, reg)      # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("orq %s, %s\n", kids[1]->regname, bnode->regname);
+reg:    EQOP(reg, reg)      # 3 # bnode->regname = kids[0]->regname; printf("movq $0, %%rax\ncmpq %s, %s\nlahf\nmovq %%rax, %2$s\nshrq $13, %2$s\nandq $0b10, %2$s\n", kids[1]->regname, bnode->regname);
+reg:    GTEQOP(reg, reg)    # 3 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("movq $0b0, %%r11\nmovq $0b10, %%rax\ncmpq %s, %s\ncmovgeq %%rax, %2$s\ncmovl %%r11, %2$s\n", kids[1]->regname, bnode->regname);

@@ -114,7 +114,7 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } mulexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } dotexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } listexp
-@attributes { symbol_t *symbols_inh; } orexp
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } orexp
 @attributes { symbol_t *symbols_inh; } cargs
 @attributes { symbol_t *symbols_inh; } glab
 
@@ -287,19 +287,19 @@ expr    :    term
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @orexp.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, OROP, @term.op_tree@, @orexp.op_tree@, 0, NULL);
              @}
         |    term GTEQ term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, GTEQOP, @term.0.op_tree@, @term.1.op_tree@, 0, NULL);          
              @}
         |    term '=' term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, EQOP, @term.0.op_tree@, @term.1.op_tree@, 0, NULL);
              @}
         |    term '-' term
              @{
@@ -396,10 +396,13 @@ orexp   :    OR term orexp
              @{
                  @i @orexp.1.symbols_inh@ = @orexp.symbols_inh@;
                  @i @term.symbols_inh@ = @orexp.symbols_inh@;
+
+                 @i NEW_OP_TREE_NODE(@orexp.op_tree@, OROP, @term.op_tree@, @orexp.1.op_tree@, 0, NULL);
              @}
         |    OR term
              @{
                  @i @term.symbols_inh@ = @orexp.symbols_inh@;
+                 @i @orexp.op_tree@ = @term.op_tree@;
              @}
         ;
 

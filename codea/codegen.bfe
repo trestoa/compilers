@@ -6,11 +6,12 @@
     #include "codegen.h"
 
     #define CHECK_NUM "test $1, %s\njnz raisesig\n"
+    #define MKLIST    printf("subq $16, %%r15\nmovq %s, (%%r15)\nmovq %s, 8(%%r15)\n", kids[0]->regname, kids[1]->regname);
 
     registers_t registers = { .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, .regs_used = 0, .varnames = {NULL, NULL, NULL, NULL, NULL, NULL}};
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9
 
 %%
 con:    CONSTANT            # 0
@@ -23,3 +24,6 @@ reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nret\n
 reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname); FREEREG(1)
 
 reg:    ADD(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\naddq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
+reg:    MUL(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\nshrq $1, %s\nimulq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
+reg:    SUB(reg, reg)       # 2 # NEWREG(bnode) printf(CHECK_NUM CHECK_NUM "movq %s, %s\nsubq %s, %s\n",kids[0]->regname, kids[1]->regname, kids[0]->regname, bnode->regname, kids[1]->regname, bnode->regname); FREEREG(2)
+reg:    MKLIST(reg, reg)    # 4 # NEWREG(bnode) MKLIST printf("leaq 1(%%r15), %s\n", bnode->regname);

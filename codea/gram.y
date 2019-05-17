@@ -111,8 +111,8 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } term
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } expr
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } addexp
-@attributes { symbol_t *symbols_inh; } mulexp
-@attributes { symbol_t *symbols_inh; } dotexp
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } mulexp
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } dotexp
 @attributes { symbol_t *symbols_inh; } orexp
 @attributes { symbol_t *symbols_inh; } cargs
 @attributes { symbol_t *symbols_inh; } glab
@@ -274,13 +274,13 @@ expr    :    term
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @mulexp.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, MUL, @term.op_tree@, @mulexp.op_tree@, 0, NULL);
              @}
         |    term dotexp
              @{
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @dotexp.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, MKLIST, @term.op_tree@, @dotexp.op_tree@, 0, NULL);
              @}
         |    term orexp
              @{
@@ -304,7 +304,7 @@ expr    :    term
              @{
                  @i @term.0.symbols_inh@ = @expr.symbols_inh@;
                  @i @term.1.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@expr.op_tree@, SUB, @term.0.op_tree@, @term.1.op_tree@, 0, NULL);
              @}
         ;
 
@@ -335,10 +335,13 @@ mulexp  :    '*' term mulexp
              @{
                  @i @mulexp.1.symbols_inh@ = @mulexp.symbols_inh@;
                  @i @term.symbols_inh@ = @mulexp.symbols_inh@;
+
+                 @i NEW_OP_TREE_NODE(@mulexp.op_tree@, MUL, @term.op_tree@, @mulexp.1.op_tree@, 0, NULL);
              @}
         |    '*' term
              @{
                  @i @term.symbols_inh@ = @mulexp.symbols_inh@;
+                 @i @mulexp.op_tree@ = @term.op_tree@;
              @}
         ;
 
@@ -346,10 +349,13 @@ dotexp  :    '.' term dotexp
              @{
                  @i @dotexp.1.symbols_inh@ = @dotexp.symbols_inh@;
                  @i @term.symbols_inh@ = @dotexp.symbols_inh@;
+
+                 @i NEW_OP_TREE_NODE(@dotexp.op_tree@, MKLIST, @term.op_tree@, @dotexp.1.op_tree@, 0, NULL);
              @}
         |    '.' term
              @{
                  @i @term.symbols_inh@ = @dotexp.symbols_inh@;
+                 @i @dotexp.op_tree@ = @term.op_tree@;
              @}
         ;
 

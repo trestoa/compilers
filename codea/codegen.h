@@ -8,7 +8,9 @@ typedef enum op {
     RET = 4,
     ADD = 5,
     MUL = 6,
-    VARUSE = 7
+    VARUSE = 7,
+    SUB = 8,
+    MKLIST = 9
 } op_t;
 
 typedef struct burm_state *STATEPTR_TYPE;

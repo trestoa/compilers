@@ -113,6 +113,7 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } addexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } mulexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } dotexp
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } listexp
 @attributes { symbol_t *symbols_inh; } orexp
 @attributes { symbol_t *symbols_inh; } cargs
 @attributes { symbol_t *symbols_inh; } glab
@@ -258,10 +259,10 @@ expr    :    term
                  @i @term.symbols_inh@ = @expr.symbols_inh@;
                  @i @expr.op_tree@  = @term.op_tree@;
              @}
-        |    listexp term
+        |    listexp
              @{
-                 @i @term.symbols_inh@ = @expr.symbols_inh@;
-                 @i @expr.op_tree@  = NULL;
+                 @i @listexp.symbols_inh@ = @expr.symbols_inh@;
+                 @i @expr.op_tree@  = @listexp.op_tree@;
              @}
         |    term addexp
              @{
@@ -308,14 +309,46 @@ expr    :    term
              @}
         ;
 
-listexp :    NOT
-        |    HEAD
-        |    TAIL
-        |    ISLIST
-        |    NOT listexp
-        |    HEAD listexp
-        |    TAIL listexp
-        |    ISLIST listexp
+listexp :    NOT term           
+             @{ 
+                 @i @term.symbols_inh@ = @listexp.symbols_inh@;
+                 @i @listexp.op_tree@ = NULL;
+             @}
+        |    HEAD term          
+             @{ 
+                 @i @term.symbols_inh@ = @listexp.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, HEADOP, @term.op_tree@, NULL, 0, NULL); 
+             @}
+        |    TAIL term          
+             @{ 
+                 @i @term.symbols_inh@ = @listexp.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, TAILOP, @term.op_tree@, NULL, 0, NULL);
+             @}
+        |    ISLIST term        
+             @{ 
+                 @i @term.symbols_inh@ = @listexp.symbols_inh@;
+                 @i @listexp.op_tree@ = NULL;
+             @}
+        |    NOT listexp        
+             @{ 
+                 @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
+                 @i @listexp.op_tree@ = NULL;
+             @}
+        |    HEAD listexp       
+             @{ 
+                 @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, HEADOP, @listexp.1.op_tree@, NULL, 0, NULL);
+             @}
+        |    TAIL listexp       
+             @{ 
+                 @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@listexp.op_tree@, TAILOP, @listexp.1.op_tree@, NULL, 0, NULL); 
+             @}
+        |    ISLIST listexp     
+             @{
+                 @i @listexp.1.symbols_inh@ = @listexp.symbols_inh@;
+                 @i @listexp.op_tree@ = NULL;
+             @}
         ;
 
 addexp  :    '+' term addexp

@@ -36,7 +36,7 @@ typedef struct op_tree {
 typedef struct registers {
     char *regnames[REGCOUNT];
     char *varnames[REGCOUNT];
-    int *regs_used[REGCOUNT];
+    int regs_used[REGCOUNT];
 } registers_t;
 
 #define PANIC printf
@@ -44,38 +44,19 @@ typedef struct registers {
 #define LEFT_CHILD(p) ((p)->kids[0])
 #define RIGHT_CHILD(p) ((p)->kids[1])
 #define STATE_LABEL(p) ((p)->state)
-#define NEWREG(p) \
-    if(registers.regs_used == 6) { printf("To many variables used.\n"); exit(4); } \
-    p->regname = registers.regnames[registers.regs_used++];
 
-#define FREEREG(regname) \
-    for(int i = 0; i < REGCOUNT; i++) { \
-        if(strcmp(regname, registers.regnames[i]) == 0) { \
-            registers.regs_used[i] = 0; \
-            registers.varnames[i] = NULL; \
-            break; \
-        } \
-    }
+void newreg(registers_t *registers, NODEPTR_TYPE p);
+#define NEWREG(p) newreg(&registers, p);
 
-#define NEWVAR(p) \
-    for(int i = 0; i < REGCOUNT; i++) { \
-        if(registers.regs_ues[i] == 0) { \
-            p->regname = registers.regnames[i]; \
-            registers.varnames[i] = p->varname; \
-            break; \
-        } \
-    } \
-    printf("To many variables used.\n"); \
-    exit(4);
+void freereg(registers_t *registers, char* regname);
+#define FREEREG(regname) freereg(&registers, regname);
+    
+void newvar(registers_t *registers, NODEPTR_TYPE p);
+#define NEWVAR(p) newvar(&registers, p);
 
-#define SET_VARREG(p) \
-    for(int i = 0; i < REGCOUNT; i++) { \
-        if(strcmp(p->varname, registers.varnames[i]) == 0) { \
-            p->regname = registers.regnames[i]; \
-            break; \
-        } \
-    }
-
+void set_varreg(registers_t *registers, NODEPTR_TYPE p);
+#define SET_VARREG(p) set_varreg(&registers, p);
+    
 #define NEW_OP_TREE_NODE(t, opval, k1, k2, _val, _varname) \
     t = malloc(sizeof(op_tree_t)); \
     t->op = opval; \

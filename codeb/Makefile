@@ -15,24 +15,26 @@ else
 	BURG = iburg
 endif
 
-OBJECTS = y.tab.o lex.yy.o codegen.o
+OBJECTS = y.tab.o lex.yy.o burgout.o codegen.o
 
 .PHONY: all clean
-all: codea
+all: codeb
 
-codea: $(OBJECTS)
+codeb: $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 y.tab.o: y.tab.c
-codegen.o: codegen.c
+burgout.o: burgout.c
 
-codegen.c: codegen.bfe codegen.h
-	$(BFE) $< | $(BURG) > codegen.c
+burgout.c: codegen.bfe codegen.h
+	$(BFE) $< | $(BURG) > burgout.c
 
 lex.yy.o: lex.yy.c y.tab.h
+
+codegen.o: codegen.c codegen.h
 
 lex.yy.c lex.yy.h: oxout.l
 	$(LEX) $<
@@ -49,5 +51,5 @@ test: f.s test.c
 	gcc -o test test.o f.o
 
 clean:
-	rm -rf ./*.o lex.yy.c y.tab.c y.tab.h oxout.y oxout.l oxout.h codegen.c codea *.s
+	rm -rf ./*.o lex.yy.c y.tab.c y.tab.h oxout.y oxout.l oxout.h burgout.c codeb *.s
 

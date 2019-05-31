@@ -1,6 +1,6 @@
 #! /bin/bash
 
-beispiel=codea
+beispiel=codeb
 PROGRAM=./$beispiel
 
 errnum=0

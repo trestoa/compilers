@@ -103,10 +103,11 @@ void print_optree(op_tree_t *t, int offset) {
 
 @attributes { symbol_t *symbols_inh; symbol_t *symbols; op_tree_t *op_tree; } vardef
 @attributes { symbol_t *symbols_inh; symbol_t *symbols; } stats
-@attributes { symbol_t *label; symbol_t *symbols_inh; } cond
+@attributes { symbol_t *label; symbol_t *symbols_inh; char *endlab; } cond
 @attributes { symbol_t *label; } condlab
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } stat
-@attributes { symbol_t *symbols_inh; } guarded
+@attributes { symbol_t *symbols_inh; char *endlab; } guarded
+@attributes { symbol_t *symbols_inh; char *endlab; } contexp
 
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } term
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } expr
@@ -218,34 +219,43 @@ cond    :    condlab COND guarded END
                  @i @guarded.symbols_inh@ = @cond.label@ == NULL
                         ? @cond.symbols_inh@ 
                         : append_symbol_node(@cond.label@, @cond.symbols_inh@);
+                 @i @cond.endlab@ = gen_label("condend");
+                 @i @guarded.endlab@ = @cond.endlab@;
                  
                  @check if(@cond.label@ != NULL) check_symbol_def(@cond.label@->name, @cond.symbols_inh@);
+                 @codegen printf("%s:\n", @cond.endlab@);
              @}
         ;
 
 condlab :    /* empty */
              @{
-                 @i @condlab.label@ = NULL;
+                 @i @condlab.label@ = new_symbol_node(gen_label("cond"), LABEL);
+                 @codegen printf("%s:\n", @condlab.label@->name);
              @}
         |    ID ':'
              @{
                  @i @condlab.label@ = new_symbol_node(@ID.val@, LABEL);
+                 @codegen printf("%s:\n", @ID.val@);
              @}
         ;
 
 guarded :    /* empty */
-        |    guarded expr RA stats contexp glab ';'
+        |    guarded expr RA stats contexp ';'
              @{
                  @i @stats.symbols_inh@ = @guarded.symbols_inh@;
                  @i @guarded.1.symbols_inh@ = @guarded.symbols_inh@;
                  @i @expr.symbols_inh@ = @guarded.symbols_inh@;
-                 @i @glab.symbols_inh@ = @guarded.symbols_inh@;
+                 @i @contexp.symbols_inh@ = @guarded.symbols_inh@;
+                 @i @guarded.1.endlab@ = @guarded.endlab@;
+                 @i @contexp.endlab@ = @guarded.endlab@;
              @}
-        |    guarded RA stats contexp glab ';'
+        |    guarded RA stats contexp ';'
              @{
                  @i @stats.symbols_inh@ = @guarded.symbols_inh@;
                  @i @guarded.1.symbols_inh@ = @guarded.symbols_inh@;
-                 @i @glab.symbols_inh@ = @guarded.symbols_inh@;
+                 @i @contexp.symbols_inh@ = @guarded.symbols_inh@;
+                 @i @guarded.1.endlab@ = @guarded.endlab@;
+                 @i @contexp.endlab@ = @guarded.endlab@;
              @}
         ;
 
@@ -253,8 +263,15 @@ glab    :    /* empty */
         |    ID @{ @check check_symbol_usage(@ID.val@, LABEL, @glab.symbols_inh@); @}
         ;
 
-contexp :    CONTINUE
-        |    BREAK
+contexp :    CONTINUE glab
+             @{
+                 @i @glab.symbols_inh@ = @contexp.symbols_inh@;
+             @}
+        |    BREAK glab
+             @{
+                 @i @glab.symbols_inh@ = @contexp.symbols_inh@;
+                 @codegen printf("jmp %s\n", @contexp.endlab@);
+             @}
         ;
 
 expr    :    term

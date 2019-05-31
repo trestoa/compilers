@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 void newreg(registers_t *registers, NODEPTR_TYPE p) {
     for(int i = 0; i < REGCOUNT; i++) {
@@ -46,4 +47,14 @@ void set_varreg(registers_t *registers, NODEPTR_TYPE p) {
             return;
         }
     }
+}
+
+char* gen_label(char *prefix) {
+    static unsigned int counter = 0;
+    counter++;
+    int digits = floor(log10(abs(counter))) + 1; 
+    int size = strlen(prefix) + digits + 1;
+    char *res = malloc(size);
+    snprintf(res, size, "%s%u", prefix, counter);
+    return res;
 }

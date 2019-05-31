@@ -57,6 +57,8 @@ void newvar(registers_t *registers, NODEPTR_TYPE p);
 
 void set_varreg(registers_t *registers, NODEPTR_TYPE p);
 #define SET_VARREG(p) set_varreg(&registers, p);
+
+char* gen_label(char* prefix);
     
 #define NEW_OP_TREE_NODE(t, opval, k1, k2, _val, _varname) \
     t = malloc(sizeof(op_tree_t)); \

@@ -1,0 +1,1 @@
+f() return 2; return 6; end;

@@ -1,0 +1,3 @@
+extern long* f(long, long);
+long *ptr = (long *)((void *) f(4, 6) - 1);
+RET(*ptr == 4 && *(ptr+1) == 6);

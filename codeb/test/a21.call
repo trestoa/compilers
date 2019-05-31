@@ -1,0 +1,3 @@
+extern long f(void);
+printf("res: %u\n", f());
+RET(f() == 4);

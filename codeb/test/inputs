@@ -1,0 +1,34 @@
+#split.fs gibt's leider nicht oeffentlich verfuegbar, weil es
+#nicht besonders gut in der Fehlerbehandlung ist (und gar nicht dokumentiert)
+
+gforth ~/abgabe/bin/split.fs -e "stdin split2 a .0 .call bye" <<EOF
+f(x) return x; end;
+
+extern long f(long);
+RET(f(6) == 6 && f(-12)==-12);
+
+f(x) return not x; end;
+
+extern long f(long);
+RET(f(6) == 4 && f(0)==2);
+EOF
+
+gforth ~/abgabe/bin/split.fs -e "stdin split2 b .xin .call bye" <<EOF
+f(x) return x+0; end;
+
+extern long f(long);
+long a[] = {0,0};
+RET(f(((long)a)|1) == ((long)a)|1);
+EOF
+
+gforth ~/abgabe/bin/split.fs -e "stdin split x .1 bye" <<EOF
+{ Kommentar ohne Ende
+EOF
+
+gforth ~/abgabe/bin/split.fs -e "stdin split y .2 bye" <<EOF
+x(x) end
+EOF
+
+gforth ~/abgabe/bin/split.fs -e "stdin split z .3 bye" <<EOF
+f() return x; end;
+EOF

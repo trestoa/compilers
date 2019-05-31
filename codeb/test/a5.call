@@ -1,0 +1,3 @@
+extern long f(long, long);
+printf("res: %u", f(4, 6));
+RET(f(4, 6) == 8);

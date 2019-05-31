@@ -1,0 +1,3 @@
+extern long f(long);
+f(2);
+RET(err == 1);

@@ -101,7 +101,7 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; } funcdef
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } pars
 
-@attributes { symbol_t *symbols_inh; symbol_t *symbols; } vardef
+@attributes { symbol_t *symbols_inh; symbol_t *symbols; op_tree_t *op_tree; } vardef
 @attributes { symbol_t *symbols_inh; symbol_t *symbols; } stats
 @attributes { symbol_t *label; symbol_t *symbols_inh; } cond
 @attributes { symbol_t *label; } condlab
@@ -204,8 +204,10 @@ vardef  :    VAR ID '=' expr
              @{
                  @i @vardef.symbols@ = new_symbol_node(@ID.val@, VARIABLE);
                  @i @expr.symbols_inh@ = @vardef.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@vardef.op_tree@, VARSET, @expr.op_tree@, NULL, 0, @ID.val@);
                  
                  @check check_symbol_def(@ID.val@, @vardef.symbols_inh@);
+                 @codegen op_tree_t *vardef_op_tree; NEW_OP_TREE_NODE(vardef_op_tree, VARDEF, NULL, NULL, 0, @ID.val@) CALL_CODEGEN(vardef_op_tree) CALL_CODEGEN(@vardef.op_tree@)
              @}
         ;
 

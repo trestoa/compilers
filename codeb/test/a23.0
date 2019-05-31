@@ -1,0 +1,1 @@
+f(a, b) var myvar = 3 * a; var othervar = 5; return b + myvar; end;

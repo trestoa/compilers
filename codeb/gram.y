@@ -194,9 +194,10 @@ stat    :    RETURN expr
         |    ID '=' expr
              @{
                  @i @expr.symbols_inh@ = @stat.symbols_inh@;
-                 @i @stat.op_tree@=NULL;
+                 @i NEW_OP_TREE_NODE(@stat.op_tree@, VARSET, @expr.op_tree@, NULL, 0, @ID.val@);
 
                  @check check_symbol_usage(@ID.val@, VARIABLE, @stat.symbols_inh@);
+                 @codegen CALL_CODEGEN(@stat.op_tree@)
              @}
         ;
 

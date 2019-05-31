@@ -132,14 +132,14 @@ funcdef :    ID '(' ')' stats END
                  @i @funcdef.symbols_inh@ = NULL;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n.globl _%s\n%s:\n_%s:\n", @ID.val@, @ID.val@, @ID.val@, @ID.val@);
+                 @preamble printf(".text\n.globl %s\n%s:\n", @ID.val@, @ID.val@);
              @}
         |    ID '(' pars ')' stats END
              @{
                  @i @funcdef.symbols_inh@ = @pars.symbols_inh@;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n.globl _%s\n%s:\n_%s:\n", @ID.val@, @ID.val@, @ID.val@, @ID.val@);
+                 @preamble printf(".text\n.globl %s\n%s:\n", @ID.val@, @ID.val@);
              @}
         ;
 

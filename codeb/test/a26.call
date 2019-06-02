@@ -1,0 +1,2 @@
+extern long f(long int);
+RET(f(4) == 10 && f(0) == 0 && f(8) == 12);

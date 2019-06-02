@@ -58,3 +58,10 @@ char* gen_label(char *prefix) {
     snprintf(res, size, "%s%u", prefix, counter);
     return res;
 }
+
+char* gen_endlabel(char *startlabel) {
+    int size = strlen(startlabel) + 4;
+    char *res = malloc(size);
+    snprintf(res, size, "%send", startlabel);
+    return res;
+}

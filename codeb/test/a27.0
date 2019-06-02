@@ -1,0 +1,1 @@
+f(a) var res = 0; cond a -> res = res + a; a = a - 1; continue; -> return res; break; end; end;

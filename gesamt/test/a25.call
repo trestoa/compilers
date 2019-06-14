@@ -1,0 +1,4 @@
+extern long f(long int);
+printf("res: %u\n", f(4));
+printf("res: %u\n", f(0));
+RET(f(4) == 10 && f(0) == 0);

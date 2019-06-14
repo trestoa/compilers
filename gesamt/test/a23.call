@@ -1,0 +1,2 @@
+extern long f(long int, long int);
+RET(f(4, 6) == 18);

@@ -1,0 +1,1 @@
+f(a) cond a >= 3 -> return a + 2; break; a >= 2 -> return a + 3; break; -> return a; break; end; end;

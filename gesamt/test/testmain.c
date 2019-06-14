@@ -31,7 +31,9 @@ int main(int argc, char *argv[])
 void raisesig()
 {
   err = 1;
-  asm("leave\nret");
+  asm("leave");
+  asm("leave");
+  asm("ret");
 }
 
 void printnoargs()

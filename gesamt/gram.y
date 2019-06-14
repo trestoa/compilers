@@ -135,14 +135,14 @@ funcdef :    ID '(' ')' stats END
                  @i @funcdef.symbols_inh@ = NULL;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n%s:\n", @ID.val@, @ID.val@);
+                 @preamble printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
              @}
         |    ID '(' pars ')' stats END
              @{
                  @i @funcdef.symbols_inh@ = @pars.symbols_inh@;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n%s:\n", @ID.val@, @ID.val@);
+                 @preamble printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
              @}
         ;
 
@@ -467,7 +467,7 @@ term    :    '(' expr ')'
              @}
         |    ID '(' ')'
              @{
-                 @i @term.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, FUNCALL, NULL, NULL, 0, @ID.val@)
              @}
         |    ID '(' cargs ')'
              @{

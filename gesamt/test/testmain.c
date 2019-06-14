@@ -3,11 +3,13 @@
 #include <signal.h>
 
 extern long callchecking();
+extern void printnoargs();
 
 static long heap[1000000];
 register long *heapptr asm("%r15");
 
 int err = 0;
+int print_call = 0;
 
 #define RET return
 
@@ -30,4 +32,10 @@ void raisesig()
 {
   err = 1;
   asm("leave\nret");
+}
+
+void printnoargs()
+{
+  printf("call!\n");
+  print_call++;
 }

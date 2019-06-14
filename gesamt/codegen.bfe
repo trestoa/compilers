@@ -9,6 +9,15 @@
     #define CHECK_LIST(reg) printf("test $1, %s\njz raisesig\n", reg);
 
     #define MKLIST    printf("subq $16, %%r15\nmovq %s, (%%r15)\nmovq %s, 8(%%r15)\n", kids[0]->regname, kids[1]->regname);
+    #define SAVE_REGS \
+        for(int i = 0; i < REGCOUNT; i++) { \
+            printf("movq %s, -%u(%rbp)\n", registers.regnames[i], (i+1) * 4); \
+        } 
+
+    #define LOAD_REGS \
+        for(int i = 0; i < REGCOUNT; i++) { \
+            printf("movq -%u(%rbp), %s\n", (i+1) * 4, registers.regnames[i]); \
+        } 
 
     registers_t registers = { 
         .regnames = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"}, 
@@ -17,7 +26,7 @@
     };
 %}
 %start reg
-%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11 NOTOP=12 ISLISTOP=13 OROP=14 EQOP=15 GTEQOP=16 VARSET=17 GUARDED=18
+%term ASSIGN=1 CONSTANT=2 VARDEF=3 RET=4 ADD=5 MUL=6 VARUSE=7 SUB=8 MKLIST=9 HEADOP = 10 TAILOP = 11 NOTOP=12 ISLISTOP=13 OROP=14 EQOP=15 GTEQOP=16 VARSET=17 GUARDED=18 FUNCALL=19
 
 %%
 con:    CONSTANT            # 0
@@ -27,8 +36,8 @@ reg:    varu                # 1 # printf("movq %s", bnode->regname); NEWREG(bnod
 
 reg:    con                 # 1 # /* Copy variable into new register */ NEWREG(bnode) printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
 
-reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nret\n", kids[0]->val);
-reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nret\n", kids[0]->regname);
+reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nleave\nret\n", kids[0]->val);
+reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nleave\nret\n", kids[0]->regname);
 
 reg:    GUARDED(reg)        # 1 # printf("test $0xFFFFFFFFFFFFFFFF, %s\njz %s\n", kids[0]->regname, bnode->varname); FREEREG(kids[0]->regname)
 
@@ -45,3 +54,5 @@ reg:    NOTOP(reg)          # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(k
 reg:    OROP(reg, reg)      # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("orq %s, %s\n", kids[1]->regname, bnode->regname); FREEREG(kids[1]->regname) 
 reg:    EQOP(reg, reg)      # 3 # bnode->regname = kids[0]->regname; printf("movq $0, %%rax\ncmpq %s, %s\nlahf\nmovq %%rax, %2$s\nshrq $13, %2$s\nandq $0b10, %2$s\n", kids[1]->regname, bnode->regname); FREEREG(kids[1]->regname)
 reg:    GTEQOP(reg, reg)    # 3 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("movq $0b0, %%r11\nmovq $0b10, %%rax\ncmpq %s, %s\ncmovgeq %%rax, %2$s\ncmovl %%r11, %2$s\n", kids[1]->regname, bnode->regname); FREEREG(kids[1]->regname)
+
+reg:    FUNCALL             # 1 # bnode->regname = "%rax"; SAVE_REGS printf("call %s\n", bnode->varname); LOAD_REGS

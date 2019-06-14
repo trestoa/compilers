@@ -20,6 +20,7 @@ typedef enum op {
     GTEQOP = 16,
     VARSET = 17,
     GUARDED = 18,
+    FUNCALL = 19,
 } op_t;
 
 typedef struct burm_state *STATEPTR_TYPE;

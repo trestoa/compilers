@@ -1,0 +1,4 @@
+extern long f(long int);
+printf("print_call: %u\n", print_call);
+f(1);
+RET(print_call == 1);

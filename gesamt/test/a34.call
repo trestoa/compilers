@@ -1,0 +1,3 @@
+extern long f(long int, long int);
+printf("res: %d\n",f(8, 2));
+RET(f(8, 2) == 10);

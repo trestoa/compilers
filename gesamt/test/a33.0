@@ -1,0 +1,1 @@
+f(a) var b = addtest(a, 2); return addtest(b, addtest(2, 3)); end;

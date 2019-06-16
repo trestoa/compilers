@@ -1,0 +1,2 @@
+sub(a, b) return a - b; end; 
+f(a, b) var c = sub(a, b); return addtest(c, 2); end;

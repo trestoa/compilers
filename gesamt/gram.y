@@ -135,14 +135,14 @@ funcdef :    ID '(' ')' stats END
                  @i @funcdef.symbols_inh@ = NULL;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
+                 @codegen RESET_REGS printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
              @}
         |    ID '(' pars ')' stats END
              @{
                  @i @funcdef.symbols_inh@ = @pars.symbols_inh@;
                  @i @stats.symbols_inh@ = @funcdef.symbols_inh@;
 
-                 @preamble printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
+                 @codegen RESET_REGS printf(".text\n.globl %s\n%s:\npushq %rbp\nmovq %rsp, %rbp\nsubq $" "48, %rsp\n", @ID.val@, @ID.val@);
              @}
         ;
 
@@ -476,7 +476,7 @@ term    :    '(' expr ')'
              @}
         ;
 
-cargs   :    cargs ',' expr
+cargs   :     expr ',' cargs
              @{
                  @i @cargs.1.symbols_inh@ = @cargs.symbols_inh@;
                  @i @expr.symbols_inh@ = @cargs.symbols_inh@;

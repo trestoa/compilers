@@ -45,6 +45,13 @@ typedef struct registers {
     int regs_used[REGCOUNT];
 } registers_t;
 
+#define RESET_REGS \
+    for(int i = 0; i < REGCOUNT; i++) { \
+        registers.regs_used[i] = 0; \
+    }
+
+extern registers_t registers;
+
 #define PANIC printf
 #define OP_LABEL(p) ((p)->op)
 #define LEFT_CHILD(p) ((p)->kids[0])

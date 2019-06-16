@@ -32,7 +32,7 @@ void newvar(registers_t *registers, NODEPTR_TYPE p) {
         if(registers->regs_used[i] == 0) { 
             registers->regs_used[i] = 1;
             p->regname = registers->regnames[i];
-            registers->varnames[i] = p->varname;
+            registers->varnames[i] = (char *) p->data;
             return;
         }
     }
@@ -42,7 +42,7 @@ void newvar(registers_t *registers, NODEPTR_TYPE p) {
 
 void set_varreg(registers_t *registers, NODEPTR_TYPE p) {
     for(int i = 0; i < REGCOUNT; i++) {
-        if(strcmp(p->varname, registers->varnames[i]) == 0) {
+        if(strcmp(p->data, registers->varnames[i]) == 0) {
             p->regname = registers->regnames[i];
             return;
         }
@@ -64,4 +64,12 @@ char* gen_endlabel(char *startlabel) {
     char *res = malloc(size);
     snprintf(res, size, "%send", startlabel);
     return res;
+}
+
+int stack_pos_for_reg(registers_t *registers, char *regname) {
+    for(int i = 0; i < REGCOUNT; i++) {
+        if(strcmp(registers->regnames[i], regname) == 0) {
+            return i + 1;
+        }
+    }
 }

@@ -118,7 +118,7 @@ void print_optree(op_tree_t *t, int offset) {
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } dotexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } listexp
 @attributes { symbol_t *symbols_inh; op_tree_t *op_tree; } orexp
-@attributes { symbol_t *symbols_inh; } cargs
+@attributes { symbol_t *symbols_inh; op_tree_t *op_tree; op_tree_t *arg; } cargs
 @attributes { symbol_t *symbols_inh; char *label; } glab
 
 @traversal @preorder check
@@ -467,12 +467,12 @@ term    :    '(' expr ')'
              @}
         |    ID '(' ')'
              @{
-                 @i NEW_OP_TREE_NODE(@term.op_tree@, FUNCALL, NULL, NULL, 0, @ID.val@)
+                 @i op_tree_t *nop; NEW_OP_TREE_NODE(nop, NOP, NULL, NULL, 0, NULL) NEW_OP_TREE_NODE(@term.op_tree@, FUNCALL, nop, NULL, 0, @ID.val@)
              @}
         |    ID '(' cargs ')'
              @{
                  @i @cargs.symbols_inh@ = @term.symbols_inh@;
-                 @i @term.op_tree@  = NULL;
+                 @i NEW_OP_TREE_NODE(@term.op_tree@, FUNCALL, @cargs.op_tree@, NULL, 0, @ID.val@)
              @}
         ;
 
@@ -480,10 +480,14 @@ cargs   :    cargs ',' expr
              @{
                  @i @cargs.1.symbols_inh@ = @cargs.symbols_inh@;
                  @i @expr.symbols_inh@ = @cargs.symbols_inh@;
+                 @i NEW_OP_TREE_NODE(@cargs.arg@, FUNARG, @expr.op_tree@, NULL, 0, NULL);
+                 @i NEW_OP_TREE_NODE(@cargs.op_tree@, FUNARGS, @cargs.1.op_tree@, @cargs.arg@, 0, NULL)
              @}
         |    expr
              @{
                  @i @expr.symbols_inh@ = @cargs.symbols_inh@;
+                 @i @cargs.arg@ = @cargs.op_tree@;
+                 @i NEW_OP_TREE_NODE(@cargs.op_tree@, FUNARG, @expr.op_tree@, NULL, 0, NULL)
              @}
         ;
 

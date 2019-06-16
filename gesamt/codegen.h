@@ -21,6 +21,9 @@ typedef enum op {
     VARSET = 17,
     GUARDED = 18,
     FUNCALL = 19,
+    FUNARG = 20,
+    FUNARGS = 21,
+    NOP = 22,
 } op_t;
 
 typedef struct burm_state *STATEPTR_TYPE;
@@ -30,7 +33,7 @@ typedef struct op_tree {
     struct op_tree *kids[2];
     STATEPTR_TYPE state;
     char *regname;
-    char *varname;
+    void *data; 
     long val;
 } op_tree_t;
 #define NODEPTR_TYPE op_tree_t*
@@ -62,8 +65,10 @@ void set_varreg(registers_t *registers, NODEPTR_TYPE p);
 
 char* gen_label(char* prefix);
 char* gen_endlabel(char* startlabel);
+
+int stack_pos_for_reg(registers_t *registers, char* regname);
     
-#define NEW_OP_TREE_NODE(t, opval, k1, k2, _val, _varname) \
+#define NEW_OP_TREE_NODE(t, opval, k1, k2, _val, _data) \
     t = malloc(sizeof(op_tree_t)); \
     t->op = opval; \
     t->kids[0] = k1; \
@@ -71,6 +76,6 @@ char* gen_endlabel(char* startlabel);
     t->state = 0; \
     t->regname = NULL; \
     t->val = _val; \
-    t->varname = _varname;
+    t->data = _data;
 
 #endif

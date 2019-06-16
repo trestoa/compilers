@@ -4,6 +4,7 @@
 
 extern long callchecking();
 extern void printnoargs();
+extern long int addtest(long int a, long int b);
 
 static long heap[1000000];
 register long *heapptr asm("%r15");
@@ -40,4 +41,10 @@ void printnoargs()
 {
   printf("call!\n");
   print_call++;
+}
+
+long addtest(long int a, long int b) 
+{
+  printf("add a:%d b:%d\n", a, b);
+  return a + b;
 }

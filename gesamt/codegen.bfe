@@ -11,12 +11,14 @@
     #define MKLIST    printf("subq $16, %%r15\nmovq %s, (%%r15)\nmovq %s, 8(%%r15)\n", kids[0]->regname, kids[1]->regname);
     #define SAVE_REGS \
         for(int i = 0; i < REGCOUNT; i++) { \
-            printf("movq %s, -%u(%rbp)\n", registers.regnames[i], (i+1) * 8); \
+            if(registers.regs_used[i]) \
+                printf("movq %s, -%u(%rbp)\n", registers.regnames[i], (i+1) * 8); \
         } 
 
     #define LOAD_REGS \
         for(int i = 0; i < REGCOUNT; i++) { \
-            printf("movq -%u(%rbp), %s\n", (i+1) * 8, registers.regnames[i]); \
+            if(registers.regs_used[i]) \
+                printf("movq -%u(%rbp), %s\n", (i+1) * 8, registers.regnames[i]); \
         } 
     
     #define LOAD_ARGS(p) \

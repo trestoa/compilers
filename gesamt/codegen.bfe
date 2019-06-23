@@ -62,7 +62,7 @@ reg:    varu                # 1 # printf("movq %s", bnode->regname); NEWREG(bnod
 reg:    con                 # 1 # /* Copy variable into new register */ NEWREG(bnode) printf("movq $%u, %s\nshlq $1, %s\n", kids[0]->val, bnode->regname, bnode->regname);
 
 reg:    RET(con)            # 1 # printf("movq $%u, %%rax\nshlq $1, %%rax\nleave\nret\n", kids[0]->val);
-reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nleave\nret\n", kids[0]->regname);
+reg:    RET(reg)            # 1 # printf("movq %s, %%rax\nleave\nret\n", kids[0]->regname); FREEREG(kids[0]->regname)
 
 reg:    GUARDED(reg)        # 1 # printf("test $0xFFFFFFFFFFFFFFFF, %s\njz %s\n", kids[0]->regname, (char *) bnode->data); FREEREG(kids[0]->regname)
 
@@ -80,6 +80,6 @@ reg:    OROP(reg, reg)      # 1 # bnode->regname = kids[0]->regname; CHECK_NUM(k
 reg:    EQOP(reg, reg)      # 3 # bnode->regname = kids[0]->regname; printf("movq $0, %%rax\ncmpq %s, %s\nlahf\nmovq %%rax, %2$s\nshrq $13, %2$s\nandq $0b10, %2$s\n", kids[1]->regname, bnode->regname); FREEREG(kids[1]->regname)
 reg:    GTEQOP(reg, reg)    # 3 # bnode->regname = kids[0]->regname; CHECK_NUM(kids[0]->regname) CHECK_NUM(kids[1]->regname) printf("movq $0b0, %%r11\nmovq $0b10, %%rax\ncmpq %s, %s\ncmovgeq %%rax, %2$s\ncmovl %%r11, %2$s\n", kids[1]->regname, bnode->regname); FREEREG(kids[1]->regname)
 
-reg:    FUNCALL(reg)        # 2 # NEWREG(bnode) SAVE_REGS LOAD_ARGS(kids[0]) printf("call %s\n", (char *) bnode->data); FREE_ARG_REGS(kids[0]) LOAD_REGS printf("movq %%rax, %s\n", bnode->regname);
+reg:    FUNCALL(reg)        # 2 # SAVE_REGS LOAD_ARGS(kids[0]) printf("call %s\n", (char *) bnode->data); FREE_ARG_REGS(kids[0]) LOAD_REGS NEWREG(bnode) printf("movq %%rax, %s\n", bnode->regname);
 reg:    FUNARG(reg)         # 2 # bnode->regname = kids[0]->regname; // NEWREG(bnode) printf("movq %s, %s\n", kids[1]->regname, bnode->regname);
 reg:    FUNARGS(reg, reg)   # 1
